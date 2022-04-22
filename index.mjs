@@ -63,6 +63,8 @@ app.get('/get_streaming_source', async (req, res) => {
         }
     }))
     
+    console.log(sources)
+
     res.send(sources)
 })
 
