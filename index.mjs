@@ -93,6 +93,13 @@ app.get('/fetch_ts', async (req, res) => {
 	got.stream(url).pipe(res)
 })
 
+app.get("/stream", (req, res) => {
+    const url = req.query.url
+    const referer = req.query.referer
+    res.setHeader('Content-Type', 'video/mp4');
+    got.stream(url, { headers: { "referer": referer }}).pipe(res);
+})
+
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`)
 })

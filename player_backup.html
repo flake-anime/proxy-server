@@ -29,12 +29,12 @@
     </div>
     <script>
         const url = new URL(window.location)
-        const dpage_link = encodeURIComponent(url.searchParams.get('dpage_link'))
+        const player_link = encodeURIComponent(url.searchParams.get('player_link'))
 
-        console.log(dpage_link)
+        console.log(player_link)
 
         const player = new Plyr('video', {captions: {active: true}});
-        $.get(`/get_streaming_source?dpage_link=${dpage_link}`, (data, status) => {
+        $.get(`/get_streaming_source?player_link=${player_link}`, (data, status) => {
             player.source = {
                 type: 'video',
                 sources: data
