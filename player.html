@@ -21,7 +21,7 @@
             const player_link = encodeURIComponent(url.searchParams.get('player_link'))
 
             const video = document.querySelector('#player');
-            const sources = await $.get(`https://proxy-server-flake-anime.herokuapp.com/get_streaming_source?player_link=${player_link}`);
+            const sources = await $.get(`/get_streaming_source?player_link=${player_link}`);
 
             const m3u8_qualities = []
             const mp4_qualities = []
