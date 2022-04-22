@@ -4,6 +4,13 @@
     <meta charset="utf-8">
     <title>HLS Demo</title>
     <link rel="stylesheet" href="https://cdn.plyr.io/1.8.2/plyr.css">
+    <link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
+    <link href="https://unpkg.com/plyr@3/dist/plyr.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/video.js/dist/video.js"></script>
+    <script src="https://unpkg.com/videojs-contrib-hls/dist/videojs-contrib-hls.js"></script> 
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=es6,Array.prototype.includes,CustomEvent,Object.entries,Object.values,URL"></script>
+    <script src="https://unpkg.com/plyr@3"></script>
     <style>
         body {
             max-width: 1024px;
@@ -54,6 +61,7 @@
                 
                 plyr.setup(video);
             } else {
+                const player = new Plyr('video', {captions: {active: true}});
                 player.source = {
                     type: 'video',
                     sources: mp4_qualities

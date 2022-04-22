@@ -34,7 +34,7 @@
         console.log(player_link)
 
         const player = new Plyr('video', {captions: {active: true}});
-        $.get(`/get_streaming_source?player_link=${player_link}`, (data, status) => {
+        $.get(`https://proxy-server-flake-anime.herokuapp.com/get_streaming_source?player_link=${player_link}`, (data, status) => {
             player.source = {
                 type: 'video',
                 sources: data
