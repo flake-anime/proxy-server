@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=utf-8 />
+    <title>AniFlake - Internal Player</title>
+    <link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
+    <link href="https://unpkg.com/plyr@3/dist/plyr.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/video.js/dist/video.js"></script>
+    <script src="https://unpkg.com/videojs-contrib-hls/dist/videojs-contrib-hls.js"></script> 
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=es6,Array.prototype.includes,CustomEvent,Object.entries,Object.values,URL"></script>
+    <script src="https://unpkg.com/plyr@3"></script>
+    <style>
+        body {
+            margin: 0px;
+            padding: 0px;
+            overflow: hidden;
+        }
+        .container {
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <video controls crossorigin playsinline></video>
+    </div>
+    <script>
+        const url = new URL(window.location)
+        const dpage_link = encodeURIComponent(url.searchParams.get('dpage_link'))
+
+        console.log(dpage_link)
+
+        const player = new Plyr('video', {captions: {active: true}});
+        $.get(`/get_streaming_source?dpage_link=${dpage_link}`, (data, status) => {
+            player.source = {
+                type: 'video',
+                sources: data
+            }
+            console.log(data)
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "proxy-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "proxy_server.js",
+  "scripts": {
+    "start": "nodemon index.mjs",
+    "test": "mocha --timeout 10000 || true"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.26.0",
+    "chai": "^4.3.6",
+    "cheerio": "^1.0.0-rc.10",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "got": "^12.0.3",
+    "m3u8-parser": "^4.7.1",
+    "mocha": "^9.2.2",
+    "node-fetch": "^3.2.3",
+    "nodemon": "^2.0.15"
+  }
+}
