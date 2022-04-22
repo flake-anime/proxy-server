@@ -1,4 +1,5 @@
 import express from "express"
+import cors from "cors"
 import got from "got"
 import m3u8Parser from 'm3u8-parser'
 import AnicliWrapper from "./engine/anicli_wrapper.mjs"
@@ -10,6 +11,8 @@ const PORT = process.env.PORT || 3000
 
 const app = express()
 const anicli = new AnicliWrapper()
+
+app.use(cors())
 
 app.get('/player', function(req, res) {
     const __filename = fileURLToPath(import.meta.url);
