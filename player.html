@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8">
     <title>HLS Demo</title>
-    <link rel="stylesheet" href="https://cdn.plyr.io/1.8.2/plyr.css">
+    <!-- <link rel="stylesheet" href="https://cdn.plyr.io/1.8.2/plyr.css"> -->
     <link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
-    <link href="https://unpkg.com/plyr@3/dist/plyr.css" rel="stylesheet">
+    <!-- <link href="https://unpkg.com/plyr@3/dist/plyr.css" rel="stylesheet"> -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://unpkg.com/video.js/dist/video.js"></script>
     <script src="https://unpkg.com/videojs-contrib-hls/dist/videojs-contrib-hls.js"></script> 
@@ -31,6 +31,17 @@
     <script src="https://cdn.jsdelivr.net/hls.js/latest/hls.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
+        function import_css(import_link) {
+            const head = document.getElementsByTagName('HEAD')[0]; 
+            let link = document.createElement('link');
+
+            link.rel = 'stylesheet'; 
+            link.type = 'text/css';
+            link.href = import_link;; 
+
+            head.appendChild(link); 
+        }
+
         (async function () {
             const url = new URL(window.location)
             const player_link = encodeURIComponent(url.searchParams.get('player_link'))
@@ -53,6 +64,8 @@
 
             if (m3u8_qualities.length >= mp4_qualities.length) {
                 if (Hls.isSupported()) {
+                    import_css("https://cdn.plyr.io/1.8.2/plyr.css")
+
                     const hls = new Hls();
                     
                     const m3u8_uri_one = m3u8_qualities[0].url;
@@ -69,6 +82,8 @@
                 
                 plyr.setup(video);
             } else {
+                import_css("https://cdn.plyr.io/1.8.2/plyr.css")
+
                 const player = new Plyr('video', {captions: {active: true}});
                 player.source = {
                     type: 'video',

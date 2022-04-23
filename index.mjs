@@ -12,6 +12,16 @@ const PORT = process.env.PORT || 3000
 const app = express()
 const anicli = new AnicliWrapper()
 
+function validURL(str) {
+    var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+      '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+      '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+      '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+    return !!pattern.test(str);
+  }
+
 app.use(cors())
 
 app.get('/player', function(req, res) {
@@ -22,6 +32,15 @@ app.get('/player', function(req, res) {
 
 app.get('/get_streaming_source', async (req, res) => {
     const player_link = req.query.player_link
+    
+    if (player_link === undefined) {
+        return res.status(400).send('player_link is required')
+    }
+
+    if (!validURL(player_link)) {
+        return res.status(400).send('player_link is invalid')
+    }
+
     const decrypted_link = await anicli.decrypt_link(player_link)
 
     let sources = []
