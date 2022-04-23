@@ -75,7 +75,7 @@ app.get('/get_streaming_source', async (req, res) => {
             const streaming_url = '/stream?url=' + encodeURIComponent(link) + '&referer=' + encodeURIComponent(player_link)
             
             sources.push({
-                src: streaming_url,
+                url: streaming_url,
                 type: 'video/mp4',
                 size: quality
             })
