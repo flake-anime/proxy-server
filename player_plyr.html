@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>HLS Demo</title>
+    <!-- <link rel="stylesheet" href="https://cdn.plyr.io/1.8.2/plyr.css"> -->
+    <link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
+    <!-- <link href="https://unpkg.com/plyr@3/dist/plyr.css" rel="stylesheet"> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/video.js/dist/video.js"></script>
+    <script src="https://unpkg.com/videojs-contrib-hls/dist/videojs-contrib-hls.js"></script> 
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=es6,Array.prototype.includes,CustomEvent,Object.entries,Object.values,URL"></script>
+    <script src="https://unpkg.com/plyr@3"></script>
+    <style>
+        body {
+            height: 100vh;
+            margin: 0px;
+            padding: 0px;
+            overflow: hidden;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            margin: 0px 0px -10px 0px;
+        }
+    </style>
+  </head>
+  <body>
+    <video preload="none" id="player" autoplay controls crossorigin></video>
+    <script src="https://cdn.plyr.io/1.8.2/plyr.js"></script>
+    <script src="https://cdn.jsdelivr.net/hls.js/latest/hls.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        function import_css(import_link) {
+            const head = document.getElementsByTagName('HEAD')[0]; 
+            let link = document.createElement('link');
+
+            link.rel = 'stylesheet'; 
+            link.type = 'text/css';
+            link.href = import_link;; 
+
+            head.appendChild(link); 
+        }
+
+        (async function () {
+            const url = new URL(window.location)
+            const player_link = encodeURIComponent(url.searchParams.get('player_link'))
+
+            const video = document.querySelector('#player');
+            const sources = await $.get(`/get_streaming_source?player_link=${player_link}`);
+
+            console.log(sources)
+
+            const m3u8_qualities = []
+            const mp4_qualities = []
+            
+            for (const source of sources) {
+                if (source.type === 'application/x-mpegURL') {
+                    m3u8_qualities.push(source);
+                } else if (source.type === 'video/mp4') {
+                    mp4_qualities.push(source);
+                }
+            }
+
+            if (m3u8_qualities.length >= mp4_qualities.length) {
+                if (Hls.isSupported()) {
+                    import_css("https://cdn.plyr.io/1.8.2/plyr.css")
+
+                    const hls = new Hls();
+                    
+                    const m3u8_uri_one = m3u8_qualities[0].url;
+                    const m3u8_uri_two = m3u8_qualities[1].url; 
+
+                    hls.loadSource(m3u8_uri_one);
+                    hls.loadSource(m3u8_uri_two);
+                    hls.attachMedia(video);
+
+                    hls.on(Hls.Events.MANIFEST_PARSED,function() {
+                        video.play();
+                    });
+                }
+                
+                plyr.setup(video);
+            } else {
+                import_css("https://cdn.plyr.io/1.8.2/plyr.css")
+
+                const player = new Plyr('video', {captions: {active: true}});
+                player.source = {
+                    type: 'video',
+                    sources: mp4_qualities
+                }
+                console.log(mp4_qualities)
+            }
+        })();
+    </script>
+  </body>
+</html>
