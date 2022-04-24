@@ -44,25 +44,10 @@ app.get('/get_streaming_source', async (req, res) => {
 
     await Promise.all(decrypted_link.map(async link => {
         if (link.includes(".m3u8")) {
-            const m3u8_file = await got(link)
-            const parser = new m3u8Parser.Parser()
-            parser.push(m3u8_file.body)
-            parser.end()
-
-            parser.manifest.playlists.forEach(async playlist => {
-                const base_link = link.substring(0, link.lastIndexOf('/'));
-                const playlist_uri = "/fetch_m3u8?url=" + encodeURIComponent(validURL(playlist.uri) ? playlist.uri : base_link + '/' + playlist.uri);
-
-                const quality_extrator_regex = /.(\d+).m3u8/   
-                const is_quality_in_name = quality_extrator_regex.test(playlist.uri)
-                const quality = is_quality_in_name ? playlist.uri.match(quality_extrator_regex)[1] : playlist.attributes.RESOLUTION.width
-                const source = {
-                    url: playlist_uri,
-                    type: 'application/x-mpegURL',
-                    quality: quality
-                }  
-
-                sources.push(source)
+            sources.push({
+                url: "/fetch_master_m3u8?url=" + encodeURIComponent(link),
+                type: 'application/x-mpegURL',
+                quality: 'original'
             })
         }
 
@@ -82,6 +67,19 @@ app.get('/get_streaming_source', async (req, res) => {
     console.log(sources)
 
     res.send(sources)
+})
+
+app.get('/fetch_master_m3u8', async (req, res) => {
+    const url = req.query.url
+    const base_url = url.split('/').slice(0, -1).join('/')
+    const m3u8_file = await fetch(url).then(res => res.text())
+
+    const regex = /(^.*\b\.m3u8\b.*)/gm
+    const is_valid_url = m3u8_file.match(regex).some(validURL)
+    const m3u8_file_filtered = m3u8_file.replace(regex, is_valid_url ? `fetch_m3u8?url=$1` : `/fetch_m3u8?url=${base_url}/$1`); 
+    
+    res.setHeader('content-type', 'application/x-mpegURL');
+    res.send(m3u8_file_filtered);
 })
 
 app.get('/fetch_m3u8', async (req, res) => {
