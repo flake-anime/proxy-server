@@ -19,31 +19,36 @@
             margin: 0px 0px -10px 0px;
             display: none;
         }
-        .ripple {
-            width: 1rem; /* control the size */
-            background: #ff0; /* control the color here */
-        }
-        .ripple,
-        .ripple::before,
-        .ripple::after {
-            content: "";
-            display: grid;
-            grid-area: 1/1;
-            aspect-ratio: 1;
-            border-radius: 50%;
-            box-shadow: 0 0 0 0 #ff03; /* and here, 3 is the transparency */
-            animation: r 3s linear infinite var(--s, 0s);
-        }
-        .ripple::before {
-            --s: 1s;
-        }
-        .ripple::after {
-            --s: 2s;
+
+        .loading {
+            display: flex;
+            transition: opacity .3s ease-in;
         }
 
-        @keyframes r {
-            to {
-                box-shadow: 0 0 0 6rem #0000;
+        .circle {
+            background-color: #ED64A6;
+            border-radius: 50%;
+            margin: 2px;
+            height: 10px;
+            width: 10px;
+            animation: jump .5s ease-in infinite;
+        }
+
+        .circle:nth-of-type(2) {
+            animation-delay: 0.1s;
+        }
+
+        .circle:nth-of-type(3) {
+            animation-delay: 0.2s;
+        }
+
+        @keyframes jump {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            
+            50% {
+                transform: translateY(-10px);
             }
         }
 
@@ -54,34 +59,38 @@
             height: 100%;
             gap: 1rem;
         }
-        /* .plyr--full-ui input[type=range] {
-            color: #000;
+        .plyr--full-ui input[type=range] {
+            color: #ED64A6;
         }
 
         .plyr__control--overlaid {
-            background: rgba(0, 0, 0, .8);
+            background: rgba(237, 100, 166, .8);
         }
 
         .plyr--video .plyr__control.plyr__tab-focus,
         .plyr--video .plyr__control:hover,
         .plyr--video .plyr__control[aria-expanded=true] {
-            background: #000;
+            background: #ED64A6;
         }
 
         .plyr__control.plyr__tab-focus {
-            box-shadow: 0 0 0 5px rgba(0, 0, 0, .5);
+            box-shadow: 0 0 0 5px rgba(237, 100, 166, .5);
         }
 
         .plyr__menu__container .plyr__control[role=menuitemradio][aria-checked=true]::before {
-            background: #000;
-        } */
+            background: #ED64A6;
+        }
     </style>
 </head>
 <body>
     <div class="loader">
-        <div class="ripple"></div>
-        <div class="ripple" style="filter:hue-rotate(120deg)"></div>
-        <div class="ripple" style="filter:grayscale()"></div>
+        <div class="loading">
+            <div class="circle"></div>
+            <div class="circle"></div>
+            <div class="circle"></div>
+        </div>
+        <!-- <div class="ripple" style="filter:hue-rotate(120deg)"></div> -->
+        <!-- <div class="ripple" style="filter:grayscale()"></div> -->
     </div>
     <video id="player" controls preload="metadata" height="100%" width="100%">
         <!-- <source src="https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8" type="application/x-mpegURL">
