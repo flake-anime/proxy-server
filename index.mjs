@@ -6,19 +6,15 @@ import AnicliWrapper from "./engine/anicli_wrapper.mjs"
 import { Transform } from 'stream'
 import { fileURLToPath } from "url"
 import path, { dirname } from 'path'
+import fetch from "node-fetch"
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 4000
 
 const app = express()
 const anicli = new AnicliWrapper()
 
 function validURL(str) {
-    var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
-      '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-      '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-      '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+    var pattern = /https?:\\?/i; // fragment locator
     return !!pattern.test(str);
   }
 
@@ -42,6 +38,7 @@ app.get('/get_streaming_source', async (req, res) => {
     }
 
     const decrypted_link = await anicli.decrypt_link(player_link)
+    console.log(decrypted_link)
 
     let sources = []
 
@@ -54,16 +51,25 @@ app.get('/get_streaming_source', async (req, res) => {
 
             parser.manifest.playlists.forEach(async playlist => {
                 const base_link = link.substring(0, link.lastIndexOf('/'));
-                const playlist_uri = "/fetch_m3u8?url=" + base_link + "/" + playlist.uri
-                
+                const playlist_uri = "/fetch_m3u8?url=" + encodeURIComponent(validURL(playlist.uri) ? playlist.uri : base_link + '/' + playlist.uri);
+
+                // console.log(playlist_uri)
+
+                // console.log(base_link)
+                // console.log(playlist.uri)
+
+                console.log(playlist)
+
                 const quality_extrator_regex = /.(\d+).m3u8/
-                const quality = playlist.uri.match(quality_extrator_regex)[1]
+                const quality = playlist.uri.match(quality_extrator_regex) !== null ? playlist.uri.match(quality_extrator_regex)[1] : "0"
 
                 const source = {
                     url: playlist_uri,
                     type: 'application/x-mpegURL',
                     quality: quality
-                }
+                }  
+
+                console.log(validURL(playlist.uri))
 
                 sources.push(source)
             })
@@ -90,21 +96,14 @@ app.get('/get_streaming_source', async (req, res) => {
 app.get('/fetch_m3u8', async (req, res) => {
 	const url = req.query.url
 	const base_url = url.split('/').slice(0, -1).join('/')
-	const parser = new Transform();
-
+    
+    const m3u8_file = await fetch(url).then(res => res.text())
+    const regex = /(^.*\b\.ts\b.*)/gm
+    const is_valid_url = m3u8_file.match(regex).some(validURL)
+    const m3u8_file_filtered = m3u8_file.replace(regex, is_valid_url ? `fetch_ts?url=$1` : `/fetch_ts?url=${base_url}/$1`); 
+    
 	res.setHeader('content-type', 'application/x-mpegURL');
-
-	parser._transform = function(data, encoding, done) {
-		const regex = /([a-z0-9./-]*.ts)/gm
-		const m3u8_filtered = Buffer.from(
-			data.toString()
-			    .replace(regex, `/fetch_ts?url=${base_url}/$1`)
-		)
-		this.push(m3u8_filtered)
-		done();
-	};
-
-	got.stream(url).pipe(parser).pipe(res);
+    res.send(m3u8_file_filtered);
 })
 
 app.get('/fetch_ts', async (req, res) => {
