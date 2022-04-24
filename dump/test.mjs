@@ -1,10 +1,10 @@
 import express from "express"
 import cors from "cors"
 import got from "got"
-import AnicliWrapper from "./engine/anicli_wrapper.mjs"
+import AnicliWrapper from "../engine/anicli_wrapper.mjs"
 import path, { dirname } from 'path'
 import { fileURLToPath } from "url"
-import GoGoAnimeScraper from "./engine/gogoanime_scraper.mjs"
+import GoGoAnimeScraper from "../engine/gogoanime_scraper.mjs"
 import stream from 'stream'
 import m3u8Parser from 'm3u8-parser'
 

@@ -1,4 +1,4 @@
-import AnicliWrapper from "./engine/anicli_wrapper.mjs"
+import AnicliWrapper from "../engine/anicli_wrapper.mjs"
 
 async function main() {
     const anicli_wrapper = new AnicliWrapper()
