@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flake Anime Player</title>
+    <link href="https://vjs.zencdn.net/7.2.3/video-js.css" rel="stylesheet">
+
+    <style>
+        body {
+            height: 100vh;
+            margin: 0px;
+            padding: 0px;
+            overflow: hidden;
+        }
+        video {
+            /* width: 100%;
+            height: 100%; */
+            margin: 0px 0px -10px 0px;
+        }
+
+        .vjs-default-skin {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <video id='video' class="video-js vjs-default-skin" controls>
+    </video>
+
+    <script src="https://vjs.zencdn.net/ie8/ie8-version/videojs-ie8.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-hls/5.14.1/videojs-contrib-hls.js"></script>
+    <script src="https://vjs.zencdn.net/7.2.3/video.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script>
+    const video_component = document.getElementById('video');
+    const source_component = document.createElement('source');
+
+    function add_source(source, type) {
+        source_component.setAttribute('src', source);
+        source_component.setAttribute('type', type);
+        video_component.appendChild(source_component);
+    }
+
+    // add_source('https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8', 'application/x-mpegURL');
+    
+    (async function () {
+        const url = new URL(window.location)
+        const player_link = encodeURIComponent(url.searchParams.get('player_link'))
+
+        const video = document.querySelector('#player');
+        const sources = await $.get(`/get_streaming_source?player_link=${player_link}`);
+
+        console.log(sources)
+
+        const m3u8_qualities = []
+        const mp4_qualities = []
+        
+        for (const source of sources) {
+            if (source.type === 'application/x-mpegURL') {
+                m3u8_qualities.push(source);
+            } else if (source.type === 'video/mp4') {
+                mp4_qualities.push(source);
+            }
+        }
+
+        if (m3u8_qualities.length >= mp4_qualities.length) {
+            for (const source of m3u8_qualities) {
+                add_source(source.url, source.type);
+                break
+            }
+            const player = videojs('video');
+            player.play();
+        } else {
+            for (const source of mp4_qualities) {
+                add_source(source.url, source.type);
+            }
+        }
+    })();
+    </script>
+</body>
+</html>
