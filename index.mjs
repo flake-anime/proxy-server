@@ -53,23 +53,14 @@ app.get('/get_streaming_source', async (req, res) => {
                 const base_link = link.substring(0, link.lastIndexOf('/'));
                 const playlist_uri = "/fetch_m3u8?url=" + encodeURIComponent(validURL(playlist.uri) ? playlist.uri : base_link + '/' + playlist.uri);
 
-                // console.log(playlist_uri)
-
-                // console.log(base_link)
-                // console.log(playlist.uri)
-
-                console.log(playlist)
-
-                const quality_extrator_regex = /.(\d+).m3u8/
-                const quality = playlist.uri.match(quality_extrator_regex) !== null ? playlist.uri.match(quality_extrator_regex)[1] : "0"
-
+                const quality_extrator_regex = /.(\d+).m3u8/   
+                const is_quality_in_name = quality_extrator_regex.test(playlist.uri)
+                const quality = is_quality_in_name ? playlist.uri.match(quality_extrator_regex)[1] : playlist.attributes.RESOLUTION.width
                 const source = {
                     url: playlist_uri,
                     type: 'application/x-mpegURL',
                     quality: quality
                 }  
-
-                console.log(validURL(playlist.uri))
 
                 sources.push(source)
             })
