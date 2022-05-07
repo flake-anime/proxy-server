@@ -5,8 +5,8 @@ import AnicliWrapper from "../engine/anicli_wrapper.mjs"
 describe("anicli_wrapper.get_dpage_link()", function() {
     it("it should return the download page of the anime", async function() {
         const anicli_wrapper = new AnicliWrapper()
-        const dpage_link = await anicli_wrapper.get_dpage_link("death-note", "1")
-        assert.equal(dpage_link, "https://gogoplay5.com/streaming.php?id=MTA2MjQ=&title=Death+Note+Episode+1");
+        const dpage_link = await anicli_wrapper.get_dpage_link("death-note-episode-", "1")
+        assert.equal(dpage_link, "https://goload.pro/streaming.php?id=MTA2MjQ=&title=Death+Note&typesub=SUB&sub=eyJlbiI6bnVsbCwiZXMiOm51bGx9&cover=Y292ZXIvZGVhdGgtbm90ZS5wbmc=");
     });
 })
 
