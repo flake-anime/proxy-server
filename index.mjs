@@ -52,9 +52,21 @@ app.get('/get_streaming_source', async (req, res) => {
         }
 
         if (link.includes(".mp4")) {
-            const quality_extrator_regex = /.(\d+)p.mp4/
-            const quality = link.match(quality_extrator_regex)[1]
+            const quality_extrator_regex = [
+                /.(\d+)p.mp4/,      // Local CDN
+                /-([a-zA-Z]+).mp4/  // Google Storage
+            ]
+            
             const streaming_url = '/stream?url=' + encodeURIComponent(link) + '&referer=' + encodeURIComponent(player_link)
+            let quality = 'original'
+
+            quality_extrator_regex.some(regex => {
+                const quality_sort = link.match(regex)
+                if (quality_sort) {
+                    quality = quality_sort[1]
+                    return true
+                }
+            });
             
             sources.push({
                 url: streaming_url,
