@@ -7,6 +7,7 @@ import { Transform } from 'stream'
 import { fileURLToPath } from "url"
 import path, { dirname } from 'path'
 import fetch from "node-fetch"
+import https from "https"
 
 const PORT = process.env.PORT || 4000
 
@@ -47,7 +48,7 @@ app.get('/get_streaming_source', async (req, res) => {
             sources.push({
                 url: "/fetch_master_m3u8?url=" + encodeURIComponent(link),
                 type: 'application/x-mpegURL',
-                quality: 'original'
+                size: 'original'
             })
         }
 
@@ -56,14 +57,21 @@ app.get('/get_streaming_source', async (req, res) => {
                 /.(\d+)p.mp4/,      // Local CDN
                 /-([a-zA-Z]+).mp4/  // Google Storage
             ]
+
+            const quality_filter = {
+                "original": 0,
+                "sd": 360,
+                "hd": 720,
+            }
             
             const streaming_url = '/stream?url=' + encodeURIComponent(link) + '&referer=' + encodeURIComponent(player_link)
-            let quality = 'original'
+            let quality = 0
 
             quality_extrator_regex.some(regex => {
                 const quality_sort = link.match(regex)
                 if (quality_sort) {
-                    quality = quality_sort[1]
+                    quality = quality_sort[1].toLowerCase()
+                    quality = quality_filter[quality] ? quality_filter[quality] : quality
                     return true
                 }
             });
@@ -114,12 +122,53 @@ app.get('/fetch_ts', async (req, res) => {
 	got.stream(url).pipe(res)
 })
 
-app.get("/stream", (req, res) => {
-    const url = req.query.url
-    const referer = req.query.referer
-    res.setHeader('Content-Type', 'video/mp4');
-    got.stream(url, { headers: { "referer": referer }}).pipe(res);
-})
+// app.get("/stream", (req, res) => {
+//     const url = req.query.url
+//     const referer = req.query.referer
+//     res.setHeader('Content-Type', 'video/mp4');
+//     got.stream(url, { headers: { "referer": referer }}).pipe(res);
+// })
+
+function getVideoStreamSize(url) {
+    return new Promise((resolve, reject) => {
+      const req = https.get(url);
+      req.once("response", (res) => {
+        req.abort();
+        const size = parseInt(res.headers["content-length"]);
+        resolve(size);
+      });
+      req.once("error", (err) => {
+        reject(err);
+      });
+    });
+  }
+  
+  app.get("/stream", async function (req, res) {
+    const url = req.query.url;
+    const referer = req.query.referer;
+    const range = req.headers.range;
+    if (!range) {
+      res.status(400).send("Requires Range header");
+    }
+    const chunkSize = 10 ** 6; // 1MB
+    const videoSize = await getVideoStreamSize(url); 
+    const start = Number(range.replace(/\D/g, ""));
+    const end = Math.min(start + chunkSize, videoSize - 1);
+    const contentLength = end - start + 1;
+    const headers = {
+      "Content-Range": `bytes ${start}-${end}/${videoSize}`,
+      "Accept-Ranges": "bytes",
+      "Content-Length": contentLength,
+      "Content-Type": "video/mp4",
+    };
+    res.writeHead(206, headers);
+    got.stream(url, {
+      headers: {
+        Referer: referer,
+        Range: `bytes=${start}-${end}`,
+      }
+    }).pipe(res)
+  })
 
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`)

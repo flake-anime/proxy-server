@@ -5,79 +5,41 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flake Anime Internal Player</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/hls.js"></script>
+    <script src="https://unpkg.com/plyr@3"></script> -->
+    <link rel="stylesheet" href="https://unpkg.com/plyr@3/dist/plyr.css">
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=es6,Array.prototype.includes,CustomEvent,Object.entries,Object.values,URL"></script>
     <script src="https://unpkg.com/plyr@3"></script>
     <style>
         .container {
-            padding-top: 18vh;
-            margin: 20px auto;
-            width: 600px;
+            margin: 50px auto;
+            max-width: 500px;
         }
-        video {
-            width: 100%;
-       }
     </style>
 </head>
 <body>   
-  <div class="container">
-    Try adjust different video quality to see it yourself
-    <video controls crossorigin playsinline >
-      <source 
-        type="application/x-mpegURL" 
-        src="https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8"
-      >
-    </video>
-  </div>
-  <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const video = document.querySelector("video");
-            const source = video.getElementsByTagName("source")[0].src;
-            
-            // For more options see: https://github.com/sampotts/plyr/#options
-            // captions.update is required for captions to work with hls.js
-            const defaultOptions = {};
+    <div class="container">
+        <video controls crossorigin playsinline poster="https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-HD.jpg">
+             <source src="https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-576p.mp4" type="video/mp4" size="original">
+                <source src="https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4" type="video/mp4" size="720">
+                <source src="https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-1080p.mp4" type="video/mp4" size="1080">
+    
+                <!-- Caption files -->
+                <track kind="captions" label="English" srclang="en" src="https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-HD.en.vtt"
+                        default>
+                <track kind="captions" label="Français" srclang="fr" src="https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-HD.fr.vtt">
+                <!-- Fallback for browsers that don't support the <video> element -->
+                <a href="https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-576p.mp4" download>Download</a>
+        </video>
+    </div>
+    <script>
+        // Change the second argument to your options:
+        // https://github.com/sampotts/plyr/#options
+        const player = new Plyr('video', {captions: {active: true}});
 
-            if (Hls.isSupported()) {
-                // For more Hls.js options, see https://github.com/dailymotion/hls.js
-                const hls = new Hls();
-                hls.loadSource(source);
-
-                // From the m3u8 playlist, hls parses the manifest and returns
-                // all available video qualities. This is important, in this approach,
-                // we will have one source on the Plyr player.
-                hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-
-                // Transform available levels into an array of integers (height values).
-                const availableQualities = hls.levels.map((l) => l.height)
-
-                // Add new qualities to option
-                defaultOptions.quality = {
-                    default: availableQualities[0],
-                    options: availableQualities,
-                    // this ensures Plyr to use Hls to update quality level
-                    forced: true,        
-                    onChange: (e) => updateQuality(e),
-                }
-
-                // Initialize here
-                const player = new Plyr(video, defaultOptions);
-                });
-                hls.attachMedia(video);
-                window.hls = hls;
-            } else {
-                // default options with no quality update in case Hls is not supported
-                const player = new Plyr(video, defaultOptions);
-            }
-
-            function updateQuality(newQuality) {
-                window.hls.levels.forEach((level, levelIndex) => {
-                if (level.height === newQuality) {
-                    console.log("Found quality match with " + newQuality);
-                    window.hls.currentLevel = levelIndex;
-                }
-                });
-            }
-        });
+        // Expose player so it can be used from the console
+        window.player = player;
     </script>
+    <!-- Plyr resources and browser polyfills are specified in the pen settings -->
 </body>
 </html>

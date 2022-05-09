@@ -92,7 +92,7 @@
         <!-- <div class="ripple" style="filter:hue-rotate(120deg)"></div> -->
         <!-- <div class="ripple" style="filter:grayscale()"></div> -->
     </div>
-    <video id="player" controls preload="metadata" height="100%" width="100%">
+    <video id="player" class="js-player" playsinline controls preload="metadata" height="100%" width="100%" data-plyr-config='{"volume": 0.3, "resetOnEnd": true, "enabled": true, "storage": { "enabled": false }, "quality": { "default": "sd" } }'>
         <!-- <source src="https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8" type="application/x-mpegURL">
         <source src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_10mb.mp4"> -->
     </video>
@@ -102,10 +102,10 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
         const video_component = document.getElementById('player');
-        const source_component = document.createElement('source');
         const loader_component = document.querySelector('.loader');
-    
+        
         function add_source(source, type, size) {
+            const source_component = document.createElement('source');
             source_component.setAttribute('src', source);
             source_component.setAttribute('type', type);
             source_component.setAttribute('size', size);
