@@ -77,7 +77,7 @@ app.get('/get_streaming_source', async (req, res) => {
             });
             
             sources.push({
-                url: streaming_url,
+                src: streaming_url,
                 type: 'video/mp4',
                 size: quality
             })

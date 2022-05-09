@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flake Anime Internal Player</title>
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.5.6/plyr.css">
+</head>
+<body>
+    <video playsinline crossorigin controls></video>
+    <script src="//cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.plyr.io/3.5.6/plyr.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        const video = document.getElementsByTagName('video')[0];
+        const player = new Plyr(video);
+        const url = new URL(window.location)
+        const playerLink = encodeURIComponent(url.searchParams.get('player_link'))
+
+        function updateQuality(newQuality) {
+            window.hls.levels.forEach((level, levelIndex) => {
+            if (level.height === newQuality) {
+                console.log("Found quality match with " + newQuality);
+                window.hls.currentLevel = levelIndex;
+            }
+            });
+        }
+
+        async function main() {
+            const sources = await $.get(`/get_streaming_source?player_link=${playerLink}`)
+            const hlsSources = []
+            const mp4Sources = []
+            sources.forEach(source => {
+                if (source.type === 'application/x-mpegURL') 
+                    hlsSources.push(source)
+                else if (source.type === 'video/mp4') 
+                    mp4Sources.push(source)
+            });
+            if (hlsSources.length > 0) {
+                const source = hlsSources[0].url
+                if (Hls.isSupported()) {
+                    const hls = new Hls();
+                    hls.loadSource(source);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+
+                        // Transform available levels into an array of integers (height values).
+                        const availableQualities = hls.levels.map((l) => l.height)
+
+                        console.log(availableQualities)
+
+                        // Add new qualities to option
+                        defaultOptions.quality = {
+                            default: availableQualities[0],
+                            options: availableQualities,
+                            // this ensures Plyr to use Hls to update quality level
+                            forced: true,        
+                            onChange: (e) => updateQuality(e),
+                        }
+
+                        
+                        player.quality = defaultOptions.quality
+                        
+                        // Initialize here
+                        // const player = new Plyr(video, defaultOptions);
+                    });
+                    console.log(source)
+
+                    hls.attachMedia(video);
+                    window.hls = hls;
+
+                } else {
+                    console.log('hls not supported')
+                    // const player = new Plyr(video, defaultOptions);
+                }
+            }
+        }
+
+        main();
+
+    </script>
+</body>
+</html>
